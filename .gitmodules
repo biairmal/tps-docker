@@ -1,0 +1,6 @@
+[submodule "tps-backend"]
+	path = tps-backend
+	url = https://github.com/biairmal/tps-backend
+[submodule "tps-frontend"]
+	path = tps-frontend
+	url = https://github.com/biairmal/tps-frontend
