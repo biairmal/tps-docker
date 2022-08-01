@@ -5,54 +5,29 @@ services:
     environment:
       - POSTGRES_PASSWORD=${DB_PASSWORD}
     ports:
-      - ${DB_PORT}:5432
-    networks:
-      - tps-network
+      - 5433:5433
     volumes:
       - ./postgres:/var/lib/postgresql/data
 
   api:
-    container_name: tps_api
+    image: biairmal/tps-api:https
     restart: always
-    build: ./tps-backend
-    command: sh -c './wait-for-it.sh 127.0.0.1:5432 --  yarn sequelize:seed:prod ; node src/index.js'
+    command: sh -c './wait-for-it.sh postgres:5432 -- yarn sequelize:seed:prod ; node src/index.js'
     ports:
-      - 8000:8000
-    networks:
-      - tps-network
+      - 8080:${HTTP_PORT}
+      - 8443:${HTTPS_PORT}
     depends_on:
       - postgres
     environment:
-      - PORT=${API_PORT}
+      - HTTP_PORT=${HTTP_PORT}
+      - HTTPS_PORT=${HTTPS_PORT}
       - NODE_ENV=${API_NODE_ENV}
       - DB_NAME=${DB_NAME}
       - DB_USERNAME=${DB_USERNAME}
       - DB_PASSWORD=${DB_PASSWORD}
       - DB_DIALECT=${DB_DIALECT}
       - DB_HOST=${DB_HOST}
-      - DB_PORT=${DB_PORT}
       - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME}
-      - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
       - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
+      - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
       - CORS_ORIGIN=${CORS_ORIGIN}
-
-  client:
-    container_name: tps_client
-    restart: unless-stopped
-    build: ./tps-frontend
-    ports:
-      - 3000:80
-    networks:
-      - tps-network
-    depends_on:
-      - api
-    environment:
-      - NODE_ENV=${REACT_APP_NODE_PATH}
-      - REACT_APP_API_BASE_URL=${REACT_APP_API_BASE_URL}
-
-networks:
-  tps-network:
-    name: tps-network
-
-volumes:
-  postgres:
